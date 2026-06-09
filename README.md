@@ -1,46 +1,64 @@
-# TINO — Site (Órbita Tech)
+# TINO
 
-Chat de inteligência comercial do TINO. É um site **estático** (HTML/CSS/JS) que chama a **API do Google Gemini direto do navegador** — então hospeda no **GitHub Pages** de graça, sem backend.
+**Inteligência comercial 360° para pequenas empresas B2B.**
 
-## Arquivos
-- `index.html` — o site inteiro (interface + lógica + system prompt embutido).
-- `system_prompt_tino.md` — o System Prompt do TINO documentado (entregável da Etapa 2).
+TINO é um assistente conversacional que analisa o funil de receita de ponta a ponta — marketing, vendas e pós-venda — e devolve diagnósticos e planos de ação. Diferente de um dashboard, ele conversa, faz perguntas e diz o que fazer.
+
+Projeto desenvolvido pela **Órbita Tech** (empresa fictícia) para a disciplina de Engenharia de Prompt — Universidade Positivo.
+
+![TINO](preview.png)
+
+## Sobre o projeto
+
+A maioria das pequenas empresas brasileiras opera vendas sem processo estruturado e fecha as portas em poucos anos. As ferramentas que poderiam ajudar ou são caras demais ou enxergam só um pedaço do funil. O TINO nasce para preencher essa lacuna: uma IA consultora acessível, em português, com visão integrada da operação comercial.
+
+A interface é um site estático em HTML/CSS/JS que conversa diretamente com a API do Google Gemini. Sem backend, sem build — abre no navegador e funciona.
+
+## Funcionalidades
+
+- **Seletor de persona** — dono, gerente comercial, SDR/closer ou marketing. O TINO ajusta o tom e a profundidade para cada perfil.
+- **Análise de planilhas** — anexe um CSV do seu funil e peça um diagnóstico.
+- **Diagnóstico prescritivo** — respostas terminam em próximos passos, não em teoria.
+- **Exportar conversa** — salva o histórico em `.txt`.
+- Funciona no celular.
+
+## Como funciona
+
+O comportamento do TINO é definido por um *system prompt* — um conjunto de instruções que estabelece personalidade, escopo e regras. A cada mensagem, o site envia ao Gemini essas instruções, a persona selecionada e o histórico da conversa. O modelo responde "no personagem".
+
+Dá para inspecionar o prompt em uso clicando na engrenagem (⚙) no topo da interface.
+
+| Item | Onde fica |
+|------|-----------|
+| System prompt | constante `SYSTEM_PROMPT` no `index.html` (documentado em `system_prompt_tino.md`) |
+| Modelo | `gemini-2.5-flash` (constante `MODEL`) |
+| Adaptação por persona | objeto `PERSONAS` |
+
+## Rodando localmente
+
+Dê um duplo clique no `index.html`. É só isso.
+
+## Publicando no GitHub Pages
+
+1. Crie um repositório público e envie o conteúdo desta pasta.
+2. Em **Settings → Pages**, escolha a branch `main` / pasta `/ (root)` e salve.
+3. Em ~1 minuto o site fica disponível em `https://SEU-USUARIO.github.io/NOME-DO-REPO/`.
+
+Depois de publicar, atualize a URL nas meta tags de preview (`og:image`, `og:url` e `twitter:image`) no topo do `index.html` para que a imagem de capa apareça ao compartilhar o link.
+
+## Estrutura
+
+```
+index.html             interface + lógica + system prompt
+system_prompt_tino.md  documentação do system prompt
+preview.png            imagem de compartilhamento (Open Graph)
+gerar_preview.py       script que gera a preview.png
+```
+
+## Equipe
+
+Rafael Gustavo de França Lima · Felipe Antonelli Bueno · Ricardo Medeiros Marcato
 
 ---
 
-## 1) Chave do Gemini
-A chave **já está embutida** no `index.html` (constante `EMBEDDED_KEY`), então o site **funciona direto** ao abrir o link — ninguém precisa colar nada. Qualquer pessoa também pode usar a própria chave clicando no ⚙ (fica salva só no navegador dela).
-
-> Para gerar/trocar a chave: **https://aistudio.google.com/apikey**.
-
-## 2) Testar no seu PC (antes de publicar)
-Basta dar **duplo clique no `index.html`** que ele abre no navegador e já conversa.
-
-## 3) Publicar no GitHub Pages
-1. Crie um repositório no GitHub (ex.: `tino-orbita`), **público**.
-2. Suba os arquivos desta pasta (`index.html` e os `.md`). Pelo site do GitHub: **Add file → Upload files → arraste tudo → Commit**.
-3. No repositório: **Settings → Pages**.
-4. Em **Source**, escolha **Deploy from a branch**; em **Branch** selecione `main` e a pasta `/ (root)`; clique **Save**.
-5. Aguarde ~1 min. O link aparece no topo dessa mesma página: `https://SEU-USUARIO.github.io/tino-orbita/`.
-6. Pronto — esse link é o que os colegas usam para testar. Cada pessoa cola a própria chave Gemini (ou você apresenta com a sua).
-
----
-
-## Recursos do site
-- 🛰️ Identidade Órbita Tech / TINO (tema "órbita").
-- 🎭 **Seletor de persona** (Dono, Gerente, SDR/Closer, Marketing) — o TINO adapta o tom em tempo real.
-- 📎 **Upload de CSV/TXT** do funil — o TINO analisa os dados enviados.
-- 💬 Chips de sugestão, "digitando…", markdown nas respostas (tabelas inclusive).
-- ⬇️ **Exportar conversa** em `.txt` (útil para anexar evidência na entrega).
-- 📱 Responsivo (funciona no celular dos colegas).
-
-## Configuração rápida
-No `index.html`, no início do `<script>`:
-- `MODEL` — modelo Gemini (padrão `gemini-2.5-flash`; pode usar `gemini-2.0-flash`).
-- `SYSTEM_PROMPT` — o cérebro do TINO (igual ao `system_prompt_tino.md`).
-- `PERSONAS` — textos de adaptação por persona.
-
----
-
-## ⚠️ Sobre segurança da chave
-Como o site é 100% no navegador, a chave que **você** usa fica no **seu** navegador (não no repositório). Se algum dia você colocar a chave fixa dentro do código e subir para um repo público, ela ficaria exposta — então **não faça isso**. Para reforçar, dá para restringir a chave por site no Google Cloud Console (APIs & Services → Credentials → restrição por *HTTP referrer*). Para um trabalho acadêmico com chave do plano gratuito, o risco é baixo.
+> TINO é uma IA consultiva. As recomendações são orientativas e não substituem a análise de um profissional.
