@@ -341,12 +341,10 @@
   // CONFIGURAÇÃO
   // ====================================================================
   const MODEL = "gemini-2.5-flash";
-  const KEY_STORAGE = "tino_gemini_key";
 
-  // Chave embutida para o site funcionar direto ao abrir o link (sem pedir nada).
-  // ATENÇÃO: fica visível em repositório público. Restrinja-a por domínio no Google Cloud
-  // (APIs & Services -> Credentials -> Application restrictions -> HTTP referrers).
-  const EMBEDDED_KEY = "AQ.Ab8RN6Ix-bAHz7Qw6lNt1rL1hI-2M__s_LyO0Nn5iQJ7SdHY_Q";
+  // URL do proxy (Cloudflare Worker) que guarda a chave do Gemini em segredo.
+  // A chave NÃO fica no site — fica só no Worker. Cole aqui a URL do seu Worker:
+  const PROXY_URL = "https://tino-proxy.mmarcatoricardo.workers.dev";
 
   const SYSTEM_PROMPT = `# QUEM VOCÊ É
 Você é o TINO, a inteligência artificial de consultoria comercial desenvolvida pela Órbita Tech. Seu nome vem da expressão brasileira "ter tino" (faro comercial) e é um acrônimo: Tráfego, Insights, Negociação, Operação.
@@ -463,8 +461,6 @@ Diagnostica gargalos por etapa do funil; encontra padrões em reuniões ganhas x
   // ====================================================================
   // CHAVE
   // ====================================================================
-  function getKey() { return localStorage.getItem(KEY_STORAGE) || EMBEDDED_KEY || ""; }
-
   // Painel "Como o TINO funciona" — mostra o modelo e o System Prompt em uso (só leitura)
   function openInfoModal() {
     document.getElementById("info-model").textContent = MODEL;
@@ -497,7 +493,7 @@ Diagnostica gargalos por etapa do funil; encontra padrões em reuniões ganhas x
   async function sendMessage() {
     const text = inputEl.value.trim();
     if (!text && !pendingFileText) return;
-    if (!getKey()) { alert("Chave da API do Gemini não configurada no código."); return; }
+    if (PROXY_URL.includes("SEU-WORKER")) { alert("Configure a URL do Worker (PROXY_URL) no index.html."); return; }
 
     removeHero();
 
@@ -523,20 +519,17 @@ Diagnostica gargalos por etapa do funil; encontra padrões em reuniões ganhas x
   }
 
   async function callGemini() {
-    const key = getKey();
     const sys = SYSTEM_PROMPT + (PERSONAS[currentPersona] ? "\n\n" + PERSONAS[currentPersona] : "");
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent(key)}`;
     const body = { system_instruction: { parts: [{ text: sys }] }, contents: history, generationConfig: { temperature: 0.7, maxOutputTokens: 1400 } };
 
     let res;
-    try { res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); }
-    catch { throw new Error("Não consegui conectar ao Gemini. Verifique sua internet."); }
+    try { res = await fetch(PROXY_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); }
+    catch { throw new Error("Não consegui conectar ao servidor do TINO. Verifique sua internet."); }
 
     if (!res.ok) {
       let detail = ""; try { detail = (await res.json()).error?.message || ""; } catch {}
-      if (res.status === 400 && /API key not valid/i.test(detail)) throw new Error("Chave da API inválida. Clique no ⚙ e cole uma chave válida.");
       if (res.status === 429) throw new Error("Limite de uso do Gemini atingido. Aguarde um pouco e tente de novo.");
-      throw new Error(`Erro do Gemini (${res.status}). ${detail}`);
+      throw new Error(`Erro (${res.status}). ${detail}`);
     }
     const data = await res.json();
     const cand = data.candidates?.[0];

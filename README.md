@@ -12,7 +12,7 @@ Projeto desenvolvido pela **Órbita Tech** (empresa fictícia) para a disciplina
 
 A maioria das pequenas empresas brasileiras opera vendas sem processo estruturado e fecha as portas em poucos anos. As ferramentas que poderiam ajudar ou são caras demais ou enxergam só um pedaço do funil. O TINO nasce para preencher essa lacuna: uma IA consultora acessível, em português, com visão integrada da operação comercial.
 
-A interface é um site estático em HTML/CSS/JS que conversa diretamente com a API do Google Gemini. Sem backend, sem build — abre no navegador e funciona.
+A interface é um site estático em HTML/CSS/JS hospedado no GitHub Pages. As chamadas ao modelo Gemini passam por um proxy leve (Cloudflare Worker) que mantém a chave da API em segredo, fora do código público.
 
 ## Funcionalidades
 
@@ -33,10 +33,20 @@ Dá para inspecionar o prompt em uso clicando na engrenagem (⚙) no topo da int
 | System prompt | constante `SYSTEM_PROMPT` no `index.html` (documentado em `system_prompt_tino.md`) |
 | Modelo | `gemini-2.5-flash` (constante `MODEL`) |
 | Adaptação por persona | objeto `PERSONAS` |
+| Proxy / chave | `cloudflare-worker.js`, com a chave guardada como secret no Worker |
+
+## Proxy da API (Cloudflare Worker)
+
+A chave do Gemini nunca fica no site. O arquivo `cloudflare-worker.js` é publicado como um Cloudflare Worker, que guarda a chave como variável secreta (`GEMINI_KEY`) e repassa as chamadas ao Gemini. O site aponta para a URL do Worker na constante `PROXY_URL` do `index.html`.
+
+Resumo do deploy:
+1. Em [dash.cloudflare.com](https://dash.cloudflare.com) → **Workers & Pages → Create Worker**, cole o conteúdo de `cloudflare-worker.js` e publique.
+2. Em **Settings → Variables**, adicione um *secret* chamado `GEMINI_KEY` com a sua chave do Gemini.
+3. Copie a URL do Worker e cole em `PROXY_URL` no `index.html`.
 
 ## Rodando localmente
 
-Dê um duplo clique no `index.html`. É só isso.
+Com o Worker já publicado, dê um duplo clique no `index.html`. As chamadas vão para o Worker, então funciona normalmente.
 
 ## Publicando no GitHub Pages
 
